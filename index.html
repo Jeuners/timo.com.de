@@ -323,6 +323,43 @@
       z-index: 1;
     }
 
+    /* EPILEPSY WARNING */
+    .epilepsy-warning {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 9999;
+      background: #000;
+      border-bottom: 3px solid #ff0000;
+      padding: 6px 50px 6px 12px;
+      font-family: "Courier New", monospace;
+      font-size: 11px;
+      color: #ff4444;
+      text-align: center;
+      animation: warnFlash 2s step-end infinite;
+      letter-spacing: 1px;
+    }
+    .epilepsy-warning span {
+      color: #ffff00;
+    }
+    .epilepsy-close {
+      position: absolute;
+      right: 10px; top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: 1px solid #ff4444;
+      color: #ff4444;
+      cursor: pointer;
+      font-family: "Courier New", monospace;
+      font-size: 11px;
+      padding: 1px 6px;
+      line-height: 1.4;
+    }
+    .epilepsy-close:hover { background: #ff4444; color: #000; }
+    @keyframes warnFlash {
+      0%,49% { border-color: #ff0000; }
+      50%,100% { border-color: #ffff00; }
+    }
+
     /* AGI BUTTON */
     .agi-btn {
       position: relative;
@@ -477,6 +514,12 @@
   </style>
 </head>
 <body>
+
+  <!-- EPILEPSY WARNING -->
+  <div class="epilepsy-warning" id="epilepsyWarn">
+    ⚠ <span>WARNING:</span> This website may cause epileptic seizures, existential dread, and an uncontrollable urge to install Netscape Navigator. &nbsp;|&nbsp; <span>Side effects include:</span> dial-up nostalgia, GIF addiction &amp; spontaneous use of "lol" ironically. ⚠
+    <button class="epilepsy-close" onclick="document.getElementById('epilepsyWarn').style.display='none'">[ OK I ACCEPT MY FATE ]</button>
+  </div>
 
   <!-- STARFIELD CANVAS -->
   <canvas id="stars-canvas"></canvas>
