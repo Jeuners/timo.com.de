@@ -1,12 +1,14 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "timocomde",
+  "account_id": "90c2242cfb6b4c838ed6a83bf9f29496",
   "compatibility_date": "2026-04-10",
   "observability": {
     "enabled": true
   },
   "assets": {
-    "directory": "."
+    "directory": ".",
+    "exclude": [".git/**", ".wrangler/**", ".github/**", "wrangler.jsonc", ".gitignore", "node_modules/**"]
   },
   "compatibility_flags": [
     "nodejs_compat"
