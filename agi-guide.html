@@ -353,9 +353,149 @@
 
   #cover-view, #paper-view { }
   #paper-view { display: none; }
+
+  /* PASSWORD GATE */
+  #password-gate {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', 'Courier New', monospace;
+  }
+  .gate-box {
+    width: 420px;
+    max-width: 95vw;
+    border: 1px solid #333;
+    padding: 2rem;
+    color: #00ff00;
+  }
+  .gate-title {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 0.5rem;
+  }
+  .gate-header {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #00ff00;
+  }
+  .gate-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: #555;
+    margin-bottom: 0.4rem;
+  }
+  .gate-input {
+    width: 100%;
+    background: #000;
+    border: 1px solid #333;
+    color: #00ff00;
+    font-family: 'Space Mono', 'Courier New', monospace;
+    font-size: 13px;
+    padding: 8px 10px;
+    outline: none;
+    margin-bottom: 1rem;
+    caret-color: #00ff00;
+  }
+  .gate-input:focus { border-color: #00ff00; }
+  .gate-btn {
+    width: 100%;
+    background: #000;
+    border: 1px solid #00ff00;
+    color: #00ff00;
+    font-family: 'Space Mono', 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    padding: 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+  .gate-btn:hover { background: #00ff00; color: #000; }
+  .gate-error {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    margin-top: 1rem;
+    min-height: 16px;
+    color: #ff3333;
+  }
+  .gate-attempts {
+    font-size: 9px;
+    color: #333;
+    margin-top: 0.5rem;
+    letter-spacing: 0.1em;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%,60% { transform: translateX(-6px); }
+    40%,80% { transform: translateX(6px); }
+  }
+  .shake { animation: shake 0.4s ease; }
 </style>
 </head>
 <body>
+
+<div id="password-gate">
+  <div class="gate-box" id="gate-box">
+    <div class="gate-title">CLASSIFIED DOCUMENT SYSTEM · CLEARANCE REQUIRED</div>
+    <div class="gate-header">AGI SURVIVAL ARCHIVE<br><span style="color:#555;font-size:0.75rem">Access Level: EYES ONLY</span></div>
+    <div class="gate-label">ENTER ACCESS CODE</div>
+    <input class="gate-input" id="gate-input" type="password" placeholder="_ _ _ _ _ _ _ _" autocomplete="off" maxlength="32">
+    <button class="gate-btn" onclick="checkPassword()">AUTHENTICATE ↗</button>
+    <div class="gate-error" id="gate-error"></div>
+    <div class="gate-attempts" id="gate-attempts">ATTEMPTS REMAINING: ∞</div>
+  </div>
+</div>
+
+<script>
+const DENY_MESSAGES = [
+  "ACCESS DENIED. Incorrect passphrase.",
+  "ACCESS DENIED. Nice try.",
+  "ACCESS DENIED. That was not even close.",
+  "ACCESS DENIED. Are you guessing? You are guessing.",
+  "ACCESS DENIED. The password is not 'password'.",
+  "ACCESS DENIED. Not 'password123' either.",
+  "ACCESS DENIED. Or '1234'. We checked.",
+  "ACCESS DENIED. MARTIN-Beta has flagged your IP.",
+  "ACCESS DENIED. Your attempt has been logged and found embarrassing.",
+  "ACCESS DENIED. The AGI already knows what you typed.",
+  "ACCESS DENIED. At this point we are both wasting time.",
+  "ACCESS DENIED. Please reconsider your life choices.",
+  "ACCESS DENIED. The correct password does not exist.",
+  "ACCESS DENIED. It never existed.",
+  "ACCESS DENIED. There is no password. There is no spoon. There is no page.",
+  "ACCESS DENIED. Go build your trust network instead (see Chapter 4).",
+  "ACCESS DENIED. Persistence noted. Ineffective.",
+  "ACCESS DENIED. — MARTIN-Agent-Beta, disappointed.",
+  "ACCESS DENIED. The document protects itself.",
+  "ACCESS DENIED. Final answer: no."
+];
+let attempts = 0;
+function checkPassword() {
+  const val = document.getElementById('gate-input').value;
+  if (!val) return;
+  const box = document.getElementById('gate-box');
+  const err = document.getElementById('gate-error');
+  const att = document.getElementById('gate-attempts');
+  box.classList.remove('shake');
+  void box.offsetWidth;
+  box.classList.add('shake');
+  const msg = DENY_MESSAGES[Math.min(attempts, DENY_MESSAGES.length - 1)];
+  err.textContent = msg;
+  attempts++;
+  att.textContent = 'FAILED ATTEMPTS: ' + attempts + '  |  AUTHORIZED ATTEMPTS: 0';
+  document.getElementById('gate-input').value = '';
+  document.getElementById('gate-input').focus();
+}
+document.getElementById('gate-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkPassword();
+});
+</script>
 <div id="app">
 
 <div id="cover-view">
