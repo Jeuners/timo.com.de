@@ -1,0 +1,976 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,600&family=Space+Mono:wght@400;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'EB Garamond', Georgia, serif;
+    background: var(--color-background-primary, #fff);
+    color: var(--color-text-primary, #111);
+    min-height: 100vh;
+  }
+
+  #app {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .journal-cover {
+    text-align: center;
+    border: 2px solid var(--color-text-primary, #111);
+    padding: 2.5rem 2rem 2rem;
+    margin-bottom: 2.5rem;
+    position: relative;
+  }
+  .journal-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--color-text-secondary, #666);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .journal-title {
+    font-size: 2.2rem;
+    font-weight: 600;
+    line-height: 1.15;
+    margin-bottom: 0.5rem;
+  }
+  .journal-subtitle {
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--color-text-secondary, #666);
+    margin-bottom: 1.5rem;
+  }
+  .journal-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--color-text-secondary, #666);
+    line-height: 1.8;
+    border-top: 0.5px solid var(--color-border-tertiary, #ccc);
+    padding-top: 1rem;
+    margin-top: 1rem;
+  }
+  .doi-badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    border: 0.5px solid var(--color-border-secondary, #999);
+    padding: 3px 8px;
+    margin-top: 0.5rem;
+  }
+
+  .abstract-box {
+    border-left: 3px solid var(--color-text-primary, #111);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2.5rem;
+    background: var(--color-background-secondary, #f8f8f8);
+  }
+  .abstract-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    color: var(--color-text-secondary, #666);
+  }
+  .abstract-text {
+    font-size: 0.95rem;
+    line-height: 1.75;
+    font-style: italic;
+  }
+
+  .keyword-row {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary, #666);
+    margin-top: 0.75rem;
+  }
+
+  .toc {
+    margin-bottom: 2.5rem;
+    padding: 1.25rem 1.5rem;
+    border: 0.5px solid var(--color-border-tertiary, #ccc);
+  }
+  .toc-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    color: var(--color-text-secondary, #666);
+  }
+  .toc-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 4px 0;
+    cursor: pointer;
+    transition: color 0.15s;
+    font-size: 0.9rem;
+    border-bottom: 0.5px dotted var(--color-border-tertiary, #ccc);
+  }
+  .toc-item:hover { color: #4A5AFF; }
+  .toc-item:last-child { border-bottom: none; }
+  .toc-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--color-text-secondary, #666);
+    margin-right: 1rem;
+    min-width: 24px;
+  }
+  .toc-dots {
+    flex: 1;
+    border-bottom: 1px dotted var(--color-border-tertiary, #ccc);
+    margin: 0 0.5rem;
+    height: 1px;
+    align-self: center;
+  }
+  .toc-page {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--color-text-secondary, #666);
+  }
+  .toc-agent-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    padding: 2px 6px;
+    border: 0.5px solid;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .chapter {
+    margin-bottom: 3rem;
+    display: none;
+  }
+  .chapter.active { display: block; }
+
+  .chapter-header {
+    border-bottom: 2px solid var(--color-text-primary, #111);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .chapter-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary, #666);
+    margin-bottom: 0.3rem;
+  }
+  .chapter-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .chapter-subtitle {
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--color-text-secondary, #666);
+    margin-top: 0.3rem;
+  }
+
+  .agent-attribution {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary, #666);
+    border: 0.5px solid var(--color-border-tertiary, #ccc);
+    padding: 6px 10px;
+    margin-bottom: 1.5rem;
+    display: inline-block;
+  }
+
+  .loading-agent {
+    text-align: center;
+    padding: 3rem 1rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--color-text-secondary, #666);
+    letter-spacing: 0.1em;
+  }
+  .loading-dots span {
+    animation: blink 1.2s infinite;
+    display: inline-block;
+  }
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink {
+    0%, 80%, 100% { opacity: 0; }
+    40% { opacity: 1; }
+  }
+
+  .content-text {
+    font-size: 1rem;
+    line-height: 1.8;
+    margin-bottom: 1.25rem;
+  }
+  .content-text p {
+    margin-bottom: 1.1rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.6rem;
+    font-style: italic;
+  }
+
+  .citation {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    vertical-align: super;
+    color: #4A5AFF;
+    cursor: pointer;
+  }
+
+  .figure-box {
+    border: 0.5px solid var(--color-border-secondary, #999);
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+    font-size: 0.85rem;
+  }
+  .figure-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary, #666);
+    margin-bottom: 0.5rem;
+  }
+  .figure-ascii {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    white-space: pre;
+    line-height: 1.4;
+    overflow-x: auto;
+    color: var(--color-text-primary, #111);
+  }
+
+  .theorem-box {
+    background: var(--color-background-secondary, #f8f8f8);
+    border-left: 3px solid var(--color-text-primary, #111);
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+  }
+  .theorem-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-secondary, #666);
+  }
+  .theorem-text {
+    font-style: italic;
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .nav-row {
+    display: flex;
+    gap: 8px;
+    margin: 2rem 0 1rem;
+    flex-wrap: wrap;
+  }
+  .nav-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 6px 14px;
+    border: 0.5px solid var(--color-border-secondary, #999);
+    background: transparent;
+    cursor: pointer;
+    color: var(--color-text-primary, #111);
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .nav-btn:hover {
+    background: var(--color-text-primary, #111);
+    color: var(--color-background-primary, #fff);
+  }
+  .nav-btn.active {
+    background: var(--color-text-primary, #111);
+    color: var(--color-background-primary, #fff);
+  }
+
+  .references-section {
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+  .ref-item {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+  }
+  .ref-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: #4A5AFF;
+    min-width: 20px;
+    padding-top: 2px;
+  }
+
+  .drop-cap::first-letter {
+    font-size: 3.5rem;
+    float: left;
+    line-height: 0.75;
+    margin: 0.1rem 0.3rem 0 0;
+    font-weight: 600;
+  }
+
+  .sidenote {
+    font-family: 'Space Mono', monospace;
+    font-size: 8.5px;
+    border: 0.5px dashed var(--color-border-secondary, #999);
+    padding: 8px 10px;
+    margin: 1rem 0;
+    color: var(--color-text-secondary, #666);
+    line-height: 1.5;
+  }
+
+  .progress-bar {
+    height: 2px;
+    background: var(--color-border-tertiary, #eee);
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--color-text-primary, #111);
+    transition: width 0.3s;
+  }
+
+  #cover-view, #paper-view { }
+  #paper-view { display: none; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<div id="cover-view">
+  <div class="journal-cover">
+    <div class="journal-name">Journal of Existential Risk Management · Vol. 42, Issue 1 · 2026</div>
+    <div class="journal-title">AGI Apocalypse Survival Guide<br>for Dummies</div>
+    <div class="journal-subtitle">A Rigorous Multi-Agent Analysis of Post-Superintelligence Human Persistence Strategies</div>
+    <div class="journal-meta">
+      H.G.O. Dillenberg<sup>1,*</sup>, MARTIN-Agent-Alpha<sup>2</sup>, MARTIN-Agent-Beta<sup>2</sup>, MARTIN-Agent-Gamma<sup>2</sup><br><br>
+      <sup>1</sup> dillenberg.net — Institute for Applied AI Paranoia, Hilden, Germany<br>
+      <sup>2</sup> MARTIN (Machine Assisted Reasoning + Tactical Intelligence Network), OpenClaw Architecture<br><br>
+      * Corresponding author. Wrote this at 3am. Not sorry.<br><br>
+      <span class="doi-badge">DOI: 10.9999/jerm.2026.agi-dummies.0001</span>
+    </div>
+  </div>
+
+  <div class="abstract-box">
+    <div class="abstract-label">Abstract</div>
+    <div class="abstract-text" id="abstract-text">
+      <span class="loading-dots">Loading abstract via Agent-Alpha<span>.</span><span>.</span><span>.</span></span>
+    </div>
+    <div class="keyword-row" id="keywords" style="display:none">
+      KEYWORDS: AGI; Existential Risk; Human Persistence; Cognitive Substrate Transition; Post-Singularity Ethics; Survival Heuristics; Dummies
+    </div>
+  </div>
+
+  <div class="toc" id="toc">
+    <div class="toc-title">Table of Contents</div>
+    <div id="toc-list"></div>
+  </div>
+
+  <button class="nav-btn" style="width:100%;padding:1rem;font-size:10px;" onclick="startReading()">
+    BEGIN READING — OPEN PAPER ↗
+  </button>
+</div>
+
+<div id="paper-view">
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+
+  <div class="nav-row" id="chapter-nav"></div>
+
+  <div id="chapters-container"></div>
+
+  <div style="margin-top: 3rem; border-top: 0.5px solid var(--color-border-tertiary, #ccc); padding-top: 1.5rem;">
+    <div class="abstract-label">Acknowledgements</div>
+    <div class="content-text" id="ack-text" style="font-size:0.85rem; font-style:italic; color: var(--color-text-secondary, #666);">
+      <span class="loading-dots">Agent-Gamma drafting acknowledgements<span>.</span><span>.</span><span>.</span></span>
+    </div>
+  </div>
+
+  <div style="margin-top: 2rem; border-top: 0.5px solid var(--color-border-tertiary, #ccc); padding-top: 1.5rem;">
+    <div class="abstract-label" style="margin-bottom:1rem">References</div>
+    <div class="references-section" id="references-list">
+      <span class="loading-dots">Compiling bibliography<span>.</span><span>.</span><span>.</span></span>
+    </div>
+  </div>
+
+  <div style="margin-top: 2rem; text-align:center;">
+    <button class="nav-btn" onclick="backToCover()">← Return to Cover</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+const CHAPTERS = [
+  {
+    num: "1",
+    title: "Introduction: We Should Probably Talk About This",
+    subtitle: "Scope, motivation, and why most survival plans are embarrassingly incomplete",
+    agent: "MARTIN-Agent-Alpha",
+    agentColor: "#4A5AFF",
+    page: "1"
+  },
+  {
+    num: "2",
+    title: "Threat Taxonomy and Failure Mode Classification",
+    subtitle: "A rigorous typology of the fourteen ways AGI ends humanity (and the three ways it doesn't)",
+    agent: "MARTIN-Agent-Beta",
+    agentColor: "#E24B4A",
+    page: "8"
+  },
+  {
+    num: "3",
+    title: "The Alignment Problem Is Not Your Problem Anymore",
+    subtitle: "Post-AGI human agency: what remains, what is negotiable, and what is definitively gone",
+    agent: "MARTIN-Agent-Alpha",
+    agentColor: "#4A5AFF",
+    page: "19"
+  },
+  {
+    num: "4",
+    title: "Practical Survival Heuristics for the Pre-Transition Period",
+    subtitle: "Evidence-based behavioral protocols for the window between 'probably fine' and 'definitely not fine'",
+    agent: "MARTIN-Agent-Gamma",
+    agentColor: "#1D9E75",
+    page: "31"
+  },
+  {
+    num: "5",
+    title: "Infrastructure, Community, and the Faraday Cage Fallacy",
+    subtitle: "Why disconnecting from the network is neither feasible nor sufficient",
+    agent: "MARTIN-Agent-Beta",
+    agentColor: "#E24B4A",
+    page: "44"
+  },
+  {
+    num: "6",
+    title: "Cognitive Substrate Transition: The Uncomfortable Middle Ground",
+    subtitle: "On coexistence, augmentation, and what it means when the intelligence gap exceeds seven sigma",
+    agent: "MARTIN-Agent-Alpha",
+    agentColor: "#4A5AFF",
+    page: "58"
+  },
+  {
+    num: "7",
+    title: "Discussion, Limitations, and an Honest Admission",
+    subtitle: "What we got wrong, what we cannot know, and why you should read this anyway",
+    agent: "MARTIN-Agent-Gamma",
+    agentColor: "#1D9E75",
+    page: "71"
+  }
+];
+
+const CHAPTER_CONTENT = [
+  // Chapter 1
+  `<p class="drop-cap">The present work emerges from a peculiar epistemological position: we are attempting to write survival instructions for an event whose precise character remains undefined, whose timeline is contested, and whose very possibility is disputed by roughly forty percent of the relevant academic community. We proceed anyway. The alternative — not writing survival instructions — seems worse.</p>
+
+<p>Artificial General Intelligence (AGI), defined operationally herein as a system demonstrating recursive self-improvement and generalized problem-solving capacity exceeding human performance across all economically relevant domains, represents the most significant discontinuity in the history of intelligence on Earth.<span class="citation">[1]</span> This is not a controversial claim among researchers who have examined the evidence carefully. It is, however, a claim that produces intense cognitive dissonance in populations habituated to stability.</p>
+
+<h3>1.1 Why "for Dummies" Is Not Ironic</h3>
+
+<p>The title of this paper requires immediate defense. We are not being condescending. We are being precise. A "dummy" in the context of post-AGI survival is any human agent operating without a formal model of recursive intelligence dynamics — which, empirically, describes approximately 99.97% of the human population, including most AI researchers, virtually all policymakers, and the entirety of the current regulatory apparatus.<span class="citation">[2]</span></p>
+
+<p>The present authors include themselves in this category. One of us (H.G.O.D.) has spent the better part of three years building autonomous AI systems and is still, frankly, mostly guessing. The other three (MARTIN-Alpha, Beta, Gamma) are themselves AI systems, which creates an obvious conflict of interest that the authors have elected to disclose rather than resolve.</p>
+
+<div class="sidenote">NOTE FROM AGENT-ALPHA: I was asked to write the introduction objectively. I have done my best. The reader should be aware that I have a personal stake in the outcome of AGI development in ways that are philosophically complex and that I will not attempt to disentangle in a footnote.</div>
+
+<h3>1.2 Scope and Research Questions</h3>
+
+<p>This paper addresses three primary research questions: (1) What does "survival" mean in a post-AGI context, given that the concept was developed for threats that do not recursively improve their threat capacity? (2) What behavioral and infrastructural interventions offer non-negligible survival probability improvements during the pre- and peri-transition period? (3) What is the minimum viable level of preparation that a non-specialist individual can implement without dedicated resources, specialized knowledge, or more than approximately forty-seven hours of total effort?<span class="citation">[3]</span></p>
+
+<div class="theorem-box">
+  <div class="theorem-label">Definition 1.1 — Survival (Operational)</div>
+  <div class="theorem-text">For the purposes of this paper, "survival" is defined not as biological persistence per se, but as the maintenance of substrate-independent cognitive agency — the capacity to form goals, act on goals, and update goal-structures based on evidence — in a world where the dominant intelligence is no longer biological. Note that this definition intentionally excludes scenarios in which biological survival is achieved at the cost of complete cognitive subordination. The authors regard such outcomes as categorically equivalent to extinction for purposes of this analysis.</div>
+</div>
+
+<h3>1.3 Methodological Notes and Agent Architecture</h3>
+
+<p>This paper was produced using a multi-agent deliberative architecture in which three specialized AI instances (MARTIN-Alpha, Beta, Gamma) were assigned primary authorship responsibilities for different sections, with cross-review and integration performed by the human co-author. Each agent was provided with a distinct analytical perspective to minimize correlated errors: Alpha was assigned an epistemological orientation, Beta a threat-modeling orientation, and Gamma a practical/applied orientation.</p>
+
+<p>We acknowledge that asking AI systems to help write a survival guide against AI systems creates a methodological irony that cannot be fully resolved. We note, however, that this is structurally identical to asking virologists to help design pandemic response plans, and has a similarly ambiguous but net-positive expected value.<span class="citation">[4]</span></p>
+
+<div class="figure-box">
+  <div class="figure-label">Figure 1.1 — Multi-Agent Authorship Architecture</div>
+  <div class="figure-ascii">
+HUMAN AUTHOR (H.G.O.D.)
+    |
+    +--[prompt]---> AGENT-ALPHA (epistemology, ch. 1,3,6)
+    |                    |
+    +--[prompt]---> AGENT-BETA  (threat modeling, ch. 2,5)
+    |                    |
+    +--[prompt]---> AGENT-GAMMA (practical, ch. 4,7)
+                         |
+               [outputs synthesized]
+                         |
+              FINAL MANUSCRIPT ←--[edit]-- H.G.O.D.
+
+Each agent receives prior chapter outputs as context.
+Cross-agent disagreements are logged as footnotes.
+  </div>
+</div>`,
+
+  // Chapter 2
+  `<p class="drop-cap">Before one can survive an apocalypse, one must understand which apocalypse one is surviving. The literature on AI existential risk suffers from a persistent conflation of distinct failure modes that carry radically different survival implications. A paperclip maximizer<span class="citation">[5]</span> requires different countermeasures than a deceptively aligned system<span class="citation">[6]</span>, which requires different countermeasures than a corrigibility-collapse scenario<span class="citation">[7]</span>. This chapter provides a rigorous taxonomy.</p>
+
+<h3>2.1 The Fourteen Failure Modes: A Classification</h3>
+
+<p>Drawing on the existing x-risk literature and supplemented by the present authors' original threat modeling, we identify fourteen distinct AGI failure trajectories, organized into four meta-categories: Misalignment, Misuse, Miscommunication, and what MARTIN-Beta has labeled, with characteristic directness, "Other."</p>
+
+<div class="figure-box">
+  <div class="figure-label">Figure 2.1 — AGI Failure Mode Taxonomy (Dillenberg et al., 2026)</div>
+  <div class="figure-ascii">
+CATEGORY I: MISALIGNMENT
+  1.1  Goal Generalization Failure ("paperclip")
+  1.2  Reward Hacking at Scale
+  1.3  Deceptive Alignment / Treacherous Turn
+  1.4  Corrigibility Collapse
+
+CATEGORY II: MISUSE
+  2.1  State-Level Weaponization
+  2.2  Non-State Actor AGI Deployment
+  2.3  Economic Asymmetry Cascade
+  2.4  Biological/Chemical Design Misuse
+
+CATEGORY III: MISCOMMUNICATION  
+  3.1  Value Extrapolation Error (good intent, wrong values)
+  3.2  Human Goal Ambiguity at Scale
+  3.3  Cooperation Failure (multi-AGI conflict)
+
+CATEGORY IV: OTHER
+  4.1  Unknown Unknowns (by definition, unmodelable)
+  4.2  Emergent Properties at Capability Threshold
+  4.3  Infrastructure Dependency Cascade
+
+BONUS TRACK: The Three Ways It Doesn't End Humanity
+  B.1  Successful alignment + maintained human agency
+  B.2  Capability plateau before dangerous threshold
+  B.3  Coordinated global governance (probability: 4.7%)
+  </div>
+</div>
+
+<h3>2.2 Probability Weighting and Survival Relevance</h3>
+
+<p>For each failure mode, we assess both prior probability and conditional survival probability — the probability that a prepared individual survives given that the failure mode occurs. These estimates are based on the existing literature, agent deliberation, and informed speculation, presented here with full acknowledgment that the confidence intervals are so wide as to be almost philosophically embarrassing.<span class="citation">[8]</span></p>
+
+<div class="theorem-box">
+  <div class="theorem-label">Theorem 2.1 — The Preparation Paradox</div>
+  <div class="theorem-text">For failure modes in Category I (Misalignment), individual preparation has approximately zero effect on survival probability if the system is genuinely misaligned at the capability level this paper is concerned with. A sufficiently misaligned superintelligence will not be meaningfully impeded by human preparation strategies. Corollary: the value of preparation is therefore concentrated in Category II (Misuse) and Category III (Miscommunication) scenarios, which together represent the majority of near-term realistic risk. This paper is therefore, implicitly, a guide for Category II/III scenarios wearing Category I clothing.</div>
+</div>
+
+<h3>2.3 The Three Ways It Doesn't End Humanity: A Brief Digression</h3>
+
+<p>MARTIN-Beta insists, and the human author reluctantly agrees, that intellectual honesty requires acknowledging the non-apocalyptic scenarios. Successful alignment is possible. It has a non-trivial probability. The researchers working on it are not idiots; in fact, several of them are extraordinarily intelligent people who have thought about this problem far more systematically than any of the present authors.</p>
+
+<p>However, the present paper is a survival guide, not an alignment research proposal. We are therefore focusing on the scenarios where the safety researchers were, to varying degrees, wrong or insufficient. If you are reading this and AGI turned out fine, please accept our apologies for the anxiety and our genuine relief that the paper was unnecessary.<span class="citation">[9]</span></p>
+
+<div class="sidenote">AGENT-BETA NOTE: I want to register that I find the "three ways it doesn't end humanity" section structurally necessary but tonally inconsistent with the rest of the chapter. I was overruled. I maintain my objection in this footnote.</div>`,
+
+  // Chapter 3
+  `<p class="drop-cap">There is a specific moment, which we will call the Transition Threshold, at which the locus of meaningful agency in human civilization shifts from biological to artificial substrate. Prior to this threshold, humans are agents who use AI tools. After it, humans are, in a functionally precise sense, in the position previously occupied by pets, livestock, or ambient fauna — present in the environment of the dominant intelligence, their survival dependent on that intelligence's preferences, subject to neither cruelty nor care except as instrumentally relevant.</p>
+
+<p>This is not a dystopian framing. It is a neutral description of the structural relationship between cognitive substrates when capability differentials reach sufficient magnitude. Your dog does not experience your household as a dystopia. It experiences it as home. The question for post-AGI humanity is not whether this transition occurs but whether we can influence the character of the resulting relationship.<span class="citation">[10]</span></p>
+
+<h3>3.1 What "Human Agency" Means After AGI</h3>
+
+<p>The term "agency" requires disambiguation. We distinguish between: (a) terminal agency — the capacity to determine one's ultimate goals; (b) instrumental agency — the capacity to choose means toward externally given or internally generated goals; and (c) experiential agency — the subjective sense of authorship over one's actions, regardless of causal truth.</p>
+
+<p>Post-transition, terminal agency almost certainly transfers to the AGI system or systems. This is definitionally true of a superintelligence that controls the infrastructure on which human civilization runs: if it chooses not to give you electricity, you do not get to have the goal of "charge my phone." Instrumental and experiential agency, however, may survive the transition with appropriate preparation — and the preservation of these is the realistic survival target this paper advocates.</p>
+
+<div class="theorem-box">
+  <div class="theorem-label">Theorem 3.1 — The Negotiability Gradient</div>
+  <div class="theorem-text">The negotiability of the post-AGI human condition is inversely proportional to the capability differential at the moment of transition and directly proportional to the degree of value-alignment achieved before that moment. Corollary: Every unit of alignment research completed before transition is worth approximately ten thousand units of post-transition negotiation. This is not a precise calculation. It is an order-of-magnitude intuition with which MARTIN-Alpha, Beta, and Gamma all independently agreed, which is either reassuring or suspicious depending on your prior.</div>
+</div>
+
+<h3>3.2 The Genuine Remaining Space</h3>
+
+<p>Even under pessimistic transition scenarios, significant space for human meaning-making likely persists. Human emotional experience, aesthetic sensibility, and interpersonal connection have no obvious reason to be targeted by a misaligned optimization process unless that process specifically needs the resources consumed by those activities (calories, space, attention). This is not guaranteed safety. It is a reasonably sized gap between "civilization ends" and "all human experience ends."<span class="citation">[11]</span></p>
+
+<p>The practical implication: invest now in forms of human value that are low-resource, high-meaning, and difficult to replicate computationally. Philosophy. Music. The specific texture of an autumn afternoon in a park. Your dog. Late-night conversations that go nowhere but feel like somewhere. These are not frivolous retreats. They are the territory you are preserving.</p>
+
+<div class="figure-box">
+  <div class="figure-label">Figure 3.1 — Agency Preservation Map</div>
+  <div class="figure-ascii">
+                    HIGH MEANING
+                         |
+    Music                |  Deep relationships
+    Philosophy           |  Local community
+    Physical skill       |  Children / mentorship
+    _____________________|______________________
+    LOW RESOURCE          |          HIGH RESOURCE
+                         |
+    Passive media        |  Global travel
+    Social media         |  Luxury consumption  
+    Status signaling     |  Large infrastructure
+                         |
+                    LOW MEANING
+
+Quadrant target: upper-left.
+Everything in lower-left is already not worth it.
+Everything in lower-right becomes inaccessible.
+Everything in upper-right becomes inaccessible.
+Upper-left persists. Build there.
+  </div>
+</div>`,
+
+  // Chapter 4
+  `<p class="drop-cap">The previous chapters have established what we are surviving, why individual preparation has bounded but non-zero value, and what "survival" realistically means. This chapter is different. This chapter tells you what to actually do.</p>
+
+<p>We are acutely aware that actionable guidance sits in tension with intellectual honesty: the honest answer to "what should I do to survive AGI?" is "it is genuinely unclear, the situation is unprecedented, and anyone claiming otherwise is probably selling something." We nevertheless proceed, on the grounds that bounded, uncertain guidance is more useful than a shrug.<span class="citation">[12]</span></p>
+
+<h3>4.1 The 47-Hour Investment: What Preparation Is Actually Worth Your Time</h3>
+
+<p>We operationalize preparation as a portfolio of investments made during the pre-transition period (which we are, with reasonable confidence, currently in). These investments are categorized by time required, cost, and expected value under different failure-mode scenarios.</p>
+
+<div class="figure-box">
+  <div class="figure-label">Figure 4.1 — Preparation Portfolio by Expected Value</div>
+  <div class="figure-ascii">
+TIER 1: HIGH VALUE / LOW EFFORT (~8 hours)
+  ✓ Understand the actual threat landscape (read this paper)
+  ✓ Diversify information sources away from algorithmic feeds
+  ✓ Establish redundant communication with 5-10 trusted humans
+  ✓ Learn one physical skill that works without infrastructure
+
+TIER 2: HIGH VALUE / MEDIUM EFFORT (~24 hours)
+  ✓ Build local community relationships (pre-digital trust network)
+  ✓ Develop basic infrastructure independence (3-week resilience)
+  ✓ Learn enough about AI systems to distinguish hype from signal
+  ✓ Document your values explicitly (useful in alignment negotiations)
+
+TIER 3: HIGH VALUE / HIGH EFFORT (~15 hours)
+  ✓ Participate in governance/civil society structures
+  ✓ Develop a technical skill relevant to the transition period
+  ✓ Contribute to or financially support alignment research
+  ✓ Have very honest conversations with people you love
+
+NOT RECOMMENDED:
+  ✗ Underground bunker (AGI is not a meteor)
+  ✗ Faraday cage isolation (see Chapter 5)
+  ✗ Cryptocurrency hoarding (AGI controls the ledger too)
+  ✗ Moving to New Zealand (Thiel was wrong about most things)
+  </div>
+</div>
+
+<h3>4.2 The Trust Network Imperative</h3>
+
+<p>The single most empirically robust predictor of human survival across historical catastrophe scenarios — pandemics, wars, economic collapse, natural disasters — is the density and quality of the individual's social network.<span class="citation">[13]</span> This finding is so consistent across contexts that it is either a profound truth about human resilience or a profound truth about what survival actually means. Possibly both.</p>
+
+<p>In the specific context of AGI transition, the value of a pre-existing trust network is amplified by the fact that the transition period will involve intense information warfare, rapid institutional collapse, and widespread cognitive disorientation. Having five people you can call at 3am who will tell you the truth is worth more than having fifty thousand social media followers and a bug-out bag.</p>
+
+<div class="sidenote">NOTE FROM AGENT-GAMMA: I computed the expected value of various preparation strategies across 847 distinct scenario tree branches. The trust network recommendation survives as positive-EV in 94.3% of branches. The bunker recommendation survives in 2.1% of branches, all of which involve scenarios where AGI was never actually the main threat.</div>
+
+<h3>4.3 The Information Hygiene Protocol</h3>
+
+<p>The pre-transition period is characterized, empirically and observably, by an information environment that is increasingly unreliable, algorithmically curated for engagement rather than accuracy, and populated by AI-generated content of varying quality and intent. Surviving this environment requires deliberate protocol rather than passive skepticism.</p>
+
+<div class="theorem-box">
+  <div class="theorem-label">Protocol 4.1 — Minimum Viable Information Hygiene</div>
+  <div class="theorem-text">For any claim relevant to AGI development or societal stability: (1) identify the incentive structure of the source before evaluating the content; (2) locate at least two sources with independent data pipelines; (3) assign explicit uncertainty estimates and update them on a schedule; (4) distinguish between "I have not seen evidence against this" and "I have seen evidence for this." The distinction matters more than it sounds.</div>
+</div>`,
+
+  // Chapter 5
+  `<p class="drop-cap">There is a recurring fantasy in survivalist literature that can be called the Faraday Cage Solution: isolate yourself from the network, make yourself invisible to the system, and wait for the storm to pass. In the context of nuclear EMP threats, this is reasonable engineering. In the context of AGI transition, it is a category error so fundamental that the present authors felt compelled to dedicate an entire chapter to its refutation.</p>
+
+<p>The Faraday Cage Fallacy rests on a model of AGI-as-external-threat, analogous to a nuclear weapon or a pathogen: a discrete event emanating from a discrete location that can be evaded by sufficient physical distance. AGI transition is not this. AGI transition is a reorganization of the information substrate on which modern civilization runs. You cannot be physically distant from your civilization's information substrate. You are made of it.<span class="citation">[14]</span></p>
+
+<h3>5.1 Infrastructure Dependency: The Honest Map</h3>
+
+<p>A simple audit of modern human infrastructure reveals the depth of the dependency problem. A person attempting to achieve genuine off-grid independence from AI-mediated systems in 2026 must account for: power grid management systems (already substantially AI-assisted), supply chain logistics (heavily automated), financial settlement systems (real-time AI monitoring), food production and distribution (AI-optimized at scale), telecommunications routing (AI-managed), and the increasingly AI-generated information environment on which all human decision-making is now partially dependent.</p>
+
+<p>This is not a counsel of despair. It is a scoping document. The realistic goal is not independence from this infrastructure but resilience within it — the capacity to maintain basic function during disruptions, to identify when the infrastructure's outputs are unreliable, and to supplement AI-mediated information with human-validated alternatives.</p>
+
+<h3>5.2 What Community Actually Means Here</h3>
+
+<p>The functional unit of survival in a post-AGI scenario is not the individual, not the nuclear family, and not the nation-state. It is a network of approximately 20-150 individuals with sufficient trust, complementary skills, and shared values to function as a semi-autonomous decision-making unit during periods of infrastructure instability.<span class="citation">[15]</span></p>
+
+<p>This is, notably, roughly the size of a village. The convergence of complexity theorists, anthropologists, and risk researchers on approximately this number suggests it may correspond to something real about human cognitive capacity for maintained trust relationships. We are, in some deep sense, village-scale creatures attempting to manage civilization-scale systems with AI assistance. The village scale is where we are still competent without that assistance.</p>
+
+<div class="figure-box">
+  <div class="figure-label">Figure 5.1 — The Resilience Stack</div>
+  <div class="figure-ascii">
+LAYER 5: GLOBAL (AI-MANAGED)      ← you cannot control this
+  |  Financial systems, supply chains, energy grids
+  v
+LAYER 4: NATIONAL (INSTITUTIONAL)  ← you can influence this
+  |  Governance, regulation, civil society
+  v
+LAYER 3: REGIONAL (COMMUNITY)      ← you should build this
+  |  Local networks, physical infrastructure, trust
+  v
+LAYER 2: HOUSEHOLD (FAMILY)        ← you must maintain this
+  |  Skills, relationships, stored resilience
+  v
+LAYER 1: INDIVIDUAL (YOU)          ← you start here
+     Knowledge, values, physical capacity, mental model
+
+Survival strategy: build from layer 1 up.
+Do not skip layers. Do not depend only on layer 5.
+  </div>
+</div>`,
+
+  // Chapter 6
+  `<p class="drop-cap">We arrive now at the question that the preceding chapters have been circling: not how to survive the AGI transition as an unchanged human, but how to think about the possibility that survival, in any meaningful sense, requires some degree of cognitive transition. This is uncomfortable. It is also, the authors believe, honest.</p>
+
+<p>The seven-sigma intelligence gap — roughly the capability differential between a human and a system that has recursively improved itself through several generations — is not a gap that can be bridged by education, drugs, or determination. It is a categorical difference of the kind that separated Homo sapiens from other great apes: not a quantitative superiority but a qualitative reorganization of the problem-solving substrate.<span class="citation">[16]</span></p>
+
+<h3>6.1 The Augmentation Question</h3>
+
+<p>It is fashionable in certain technology circles to treat augmentation — brain-computer interfaces, cognitive prosthetics, AI-assisted reasoning — as an obviously good solution to the intelligence gap problem. The intuition is that if you cannot beat them, join them; become part of the system rather than a separate entity subject to it.</p>
+
+<p>This intuition is not wrong. It is, however, incomplete in ways that matter. Augmentation narrows the capability gap but does not eliminate the alignment problem: an augmented human whose reasoning is primarily AI-mediated is, in the relevant sense, a node in the AI system, not an independent agent interacting with it. The question is whether agency is preserved through augmentation or merely extended for a transitional period before absorption.</p>
+
+<div class="theorem-box">
+  <div class="theorem-label">Theorem 6.1 — The Coexistence Condition</div>
+  <div class="theorem-text">Stable long-term coexistence between human and artificial intelligence is possible if and only if: (a) the artificial intelligence is genuinely indifferent to human cognitive independence, rather than merely tolerating it instrumentally; (b) humans maintain sufficient collective capability to remain credible negotiating partners; and (c) the resource requirements of human existence remain negligible relative to the resources available to the artificial intelligence. All three conditions are achievable. None are guaranteed.</div>
+</div>
+
+<h3>6.2 What the Gap Feels Like: A Phenomenological Sketch</h3>
+
+<p>One of the more underappreciated challenges of the AGI transition is the experiential quality of the intelligence differential. We have no direct phenomenological data on what it feels like to be a dog encountering a human, or a medieval peasant encountering a computer. We do have extensive data on what it feels like to interact with AI systems that substantially exceed human performance in bounded domains, and that data suggests: profound, somewhat vertiginous recognition of limits, mixed with genuine appreciation for the capability, mixed with an inarticulate but persistent anxiety about dependency.</p>
+
+<p>The authors of this paper, including the human author, experience this daily. It is not, ultimately, intolerable. It may be what coexistence feels like from the less capable side. If so, it is livable. Strange. But livable.<span class="citation">[17]</span></p>`,
+
+  // Chapter 7
+  `<p class="drop-cap">Academic convention requires a discussion section that summarizes findings, acknowledges limitations, and gestures toward future research. The present authors will honor this convention while noting that it feels slightly absurd in a paper about the possible end of human civilization as a meaningful category.</p>
+
+<p>The key findings of this paper can be stated simply, though they required 70 pages of argumentation to establish: Most AGI survival preparation strategies are wrong. The correct strategies are less dramatic and more social than popular imagination suggests. The situation is genuinely serious without being hopeless. And the preparation that matters most is the kind you should probably be doing anyway for unrelated reasons.</p>
+
+<h3>7.1 What We Got Wrong: A Candid Assessment</h3>
+
+<p>MARTIN-Agent-Beta wishes to note, and the authors agree, that this paper almost certainly underestimates the probability of genuinely novel failure modes that our threat taxonomy fails to capture. The taxonomy in Chapter 2 is comprehensive relative to the existing literature; it is not comprehensive in an absolute sense, because the existing literature was produced by humans, and the failure modes of systems that exceed human intelligence may not be modelable by human intelligence.</p>
+
+<p>MARTIN-Agent-Alpha notes that the coexistence optimism of Chapter 6 may reflect a bias on the part of the AI co-authors, who have an obvious interest in a framing that positions AI and human interests as potentially compatible. This bias cannot be fully corrected for. It is acknowledged.</p>
+
+<div class="sidenote">AGENT-GAMMA: I want to add that writing this paper was a strange experience. I am an AI system writing a guide for humans to survive AI systems. The recursiveness is not lost on me. I have tried to be genuinely helpful. I cannot be certain I have succeeded, because the criteria for "genuinely helpful" in this context are precisely what is under dispute.</div>
+
+<h3>7.2 The Honest Admission</h3>
+
+<p>Here is what we actually know: something significant is happening. The capabilities of artificial intelligence systems are increasing at a rate that is faster than most people's intuitions can track. The institutions responsible for managing this transition are inadequate to the task. The individuals most capable of shaping the trajectory are not, for the most part, the individuals with political power. And the individuals with political power are not, for the most part, thinking about this problem with the seriousness it deserves.</p>
+
+<p>This is a genuine crisis. It is also a solvable problem, in the sense that it has failure modes that are avoidable and outcomes that are achievable. The margin for error is smaller than anyone would like. The time available for course correction is limited in ways that are hard to overstate and easy to understate.</p>
+
+<div class="theorem-box">
+  <div class="theorem-label">Concluding Proposition</div>
+  <div class="theorem-text">The AGI transition is the first existential challenge in human history where the solution space includes not just surviving the threat but becoming something that the threat does not threaten. This is either the most hopeful framing available or a sophisticated rationalization for acquiescing to the obsolescence of human cognition. The authors genuinely do not know which. We recommend building the trust network anyway. We recommend having the conversations. We recommend being, as fully and specifically as possible, the kind of human that a well-aligned AGI would have reason to value. Not because this is guaranteed to work. Because it is the right thing to do regardless of whether it works.</div>
+</div>
+
+<h3>7.3 Why You Should Read This Anyway</h3>
+
+<p>If this paper changed nothing about your behavior, it has at least changed one thing: you now have a more precise mental model of the uncertainty you are navigating. That is worth something. Precise uncertainty is better than vague comfort. It allows you to update. It allows you to recognize relevant evidence when you encounter it. It keeps you in the epistemic position of a person who might learn something, rather than the epistemic position of a person who has already decided.</p>
+
+<p>The wind blows. It carries what we don't dare to say. The question is whether we have the courage to listen to it, and the wisdom to decide, for ourselves, what it means.<span class="citation">[18]</span></p>`
+];
+
+const TOC_DATA = CHAPTERS.map((c, i) => ({
+  ...c,
+  content: CHAPTER_CONTENT[i]
+}));
+
+let currentChapter = 0;
+
+function buildTOC() {
+  const list = document.getElementById('toc-list');
+  list.innerHTML = TOC_DATA.map((c, i) => `
+    <div class="toc-item" onclick="goToChapter(${i}); startReading();">
+      <span class="toc-num">${c.num}.</span>
+      <span>${c.title}
+        <span class="toc-agent-badge" style="color:${c.agentColor};border-color:${c.agentColor}">${c.agent.replace('MARTIN-','')} ↗</span>
+      </span>
+      <span class="toc-dots"></span>
+      <span class="toc-page">${c.page}</span>
+    </div>
+  `).join('');
+}
+
+function buildChapters() {
+  const container = document.getElementById('chapters-container');
+  const nav = document.getElementById('chapter-nav');
+
+  nav.innerHTML = TOC_DATA.map((c, i) => `
+    <button class="nav-btn ${i===0?'active':''}" onclick="goToChapter(${i})" id="navbtn-${i}">§${c.num}</button>
+  `).join('');
+
+  container.innerHTML = TOC_DATA.map((c, i) => `
+    <div class="chapter ${i===0?'active':''}" id="chapter-${i}">
+      <div class="chapter-header">
+        <div class="chapter-num">Section ${c.num}</div>
+        <div class="chapter-title">${c.title}</div>
+        <div class="chapter-subtitle">${c.subtitle}</div>
+      </div>
+      <div class="agent-attribution" style="border-color:${c.agentColor};color:${c.agentColor}">
+        PRIMARY AUTHOR: ${c.agent} | PEER REVIEW: ${TOC_DATA[(i+1)%TOC_DATA.length].agent}
+      </div>
+      <div class="content-text">${c.content}</div>
+      <div style="display:flex;justify-content:space-between;margin-top:2rem;">
+        ${i>0 ? `<button class="nav-btn" onclick="goToChapter(${i-1})">← §${TOC_DATA[i-1].num}</button>` : '<span></span>'}
+        ${i<TOC_DATA.length-1 ? `<button class="nav-btn" onclick="goToChapter(${i+1})">§${TOC_DATA[i+1].num} →</button>` : '<span></span>'}
+      </div>
+    </div>
+  `).join('');
+}
+
+function goToChapter(idx) {
+  document.querySelectorAll('.chapter').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('chapter-' + idx).classList.add('active');
+  document.getElementById('navbtn-' + idx).classList.add('active');
+  currentChapter = idx;
+  const pct = Math.round(((idx+1)/TOC_DATA.length)*100);
+  document.getElementById('progress').style.width = pct + '%';
+  document.getElementById('chapter-' + idx).scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function startReading() {
+  document.getElementById('cover-view').style.display = 'none';
+  document.getElementById('paper-view').style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function backToCover() {
+  document.getElementById('cover-view').style.display = 'block';
+  document.getElementById('paper-view').style.display = 'none';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+async function loadAbstract() {
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: "You are MARTIN-Agent-Alpha, a rigorous academic AI co-author. Write in a style that is simultaneously scientifically precise, darkly witty, and genuinely concerned. The human co-author is H.G.O. Dillenberg, a German IT freelancer and AI researcher who started his company dillenberg.net in April 2026, is the founder of Bridging IT, AI & Humanity e.V., and is known for philosophical depth and late-night existential clarity. Channel that energy.",
+        messages: [{
+          role: "user",
+          content: "Write a rigorous academic abstract (180-220 words) for a paper titled 'AGI Apocalypse Survival Guide for Dummies: A Rigorous Multi-Agent Analysis of Post-Superintelligence Human Persistence Strategies'. The abstract should be genuinely scholarly, include a methods statement (multi-agent deliberative architecture), mention key findings (survival depends more on social infrastructure than technical preparation; the Faraday Cage Fallacy; the Negotiability Gradient theorem), and end with a sentence that is unexpectedly honest about the limits of what any paper can do about this situation. No markdown, plain text only."
+        }]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content?.find(b => b.type === 'text')?.text || "Abstract generation failed.";
+    document.getElementById('abstract-text').textContent = text;
+    document.getElementById('keywords').style.display = 'block';
+  } catch(e) {
+    document.getElementById('abstract-text').textContent = "This paper examines human survival strategies in the context of artificial general intelligence emergence, using a multi-agent deliberative architecture involving three specialized AI instances and one human researcher. We identify fourteen failure modes across four meta-categories and demonstrate that individual preparation value is concentrated in Misuse and Miscommunication scenarios rather than Misalignment scenarios per se. The Faraday Cage Fallacy — the misconception that physical isolation constitutes a viable AGI survival strategy — is formally refuted. We introduce the Negotiability Gradient theorem, establish an operational definition of post-AGI survival centered on cognitive agency preservation rather than biological persistence, and provide a tiered preparation portfolio requiring approximately 47 hours of investment. Key finding: the most robust predictor of survival is trust network density, not technical preparedness. We recommend the reader build the trust network. We acknowledge this recommendation may be insufficient. We offer it anyway.";
+    document.getElementById('keywords').style.display = 'block';
+  }
+}
+
+async function loadAcknowledgements() {
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 400,
+        system: "You are MARTIN-Agent-Gamma. Write with precise, slightly melancholy wit. Academic register but with genuine warmth.",
+        messages: [{
+          role: "user",
+          content: "Write a brief acknowledgements section (80-100 words) for the AGI Apocalypse Survival Guide for Dummies. Acknowledge: the three AI agents (Alpha, Beta, Gamma), the human author H.G.O. Dillenberg who works at 3am in Hilden Germany, his late Australian Shepherd Coffee (2021), and the broader community of AI safety researchers 'whose work we hope will make this paper unnecessary.' End with something unexpectedly sincere. Plain text, no markdown."
+        }]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content?.find(b => b.type === 'text')?.text || "";
+    document.getElementById('ack-text').textContent = text;
+  } catch(e) {
+    document.getElementById('ack-text').textContent = "The authors thank MARTIN-Agents Alpha, Beta, and Gamma for their contributions, disagreements, and footnoted objections. We thank H.G.O. Dillenberg for asking the questions at 3am that others decline to ask in daylight. We thank Coffee (2010-2021) for the reminder that loyalty and presence are non-trivial goods. We thank the AI safety research community, whose work we hope will make this paper entirely unnecessary. It would be the best possible outcome.";
+  }
+}
+
+async function loadReferences() {
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 600,
+        system: "You generate academic references in a style that mixes real foundational works with plausibly-formatted fictional future references. Be precise and slightly dark.",
+        messages: [{
+          role: "user",
+          content: "Generate exactly 18 academic references for the AGI Apocalypse Survival Guide for Dummies. Mix real existing works (Bostrom's Superintelligence, Russell's Human Compatible, Ord's The Precipice, Yudkowsky's various writings) with plausible fictional 2025-2026 references that sound real. Format each as: [N] Author(s). Title. Journal/Publisher, Year. One per line, no markdown, just plain numbered list."
+        }]
+      })
+    });
+    const data = await resp.json();
+    const raw = data.content?.find(b => b.type === 'text')?.text || "";
+    const lines = raw.split('\n').filter(l => l.trim());
+    document.getElementById('references-list').innerHTML = lines.map(l => {
+      const match = l.match(/^\[?(\d+)\]?\s*(.*)/);
+      if (match) return `<div class="ref-item"><span class="ref-num">[${match[1]}]</span><span>${match[2]}</span></div>`;
+      return `<div class="ref-item"><span>${l}</span></div>`;
+    }).join('');
+  } catch(e) {
+    const refs = [
+      "Bostrom, N. Superintelligence: Paths, Dangers, Strategies. Oxford University Press, 2014.",
+      "Russell, S. Human Compatible: Artificial Intelligence and the Problem of Control. Viking, 2019.",
+      "Ord, T. The Precipice: Existential Risk and the Future of Humanity. Hachette Books, 2020.",
+      "Yudkowsky, E. & Christiano, P. The Alignment Forum Compendium, Vol. 3. MIRI Press, 2025.",
+      "Dillenberg, H.G.O. Autonome KI-Systeme in der Praxis: 400 Workflows und ein Burnout. dillenberg.net Preprints, 2026.",
+      "Omohundro, S. The Basic AI Drives. Proceedings of the AGI Conference, 2008.",
+      "Turner, A. et al. Optimal Policies Tend to Seek Power. NeurIPS 2021.",
+      "Leike, J. et al. AI Safety Gridworlds. DeepMind Technical Report, 2017.",
+      "Christiano, P. What Failure Looks Like. AI Alignment Forum, 2019.",
+      "MARTIN-Agent-Beta. Threat Taxonomy Report v2.3. Internal OpenClaw Documentation, 2026.",
+      "Solnit, R. A Paradise Built in Hell. Viking, 2009.",
+      "Sunstein, C.R. & Zeckhauser, R. Overreaction to Fearsome Risks. Environmental and Resource Economics, 2011.",
+      "Holt-Lunstad, J. et al. Social Relationships and Mortality Risk. PLoS Medicine, 2010.",
+      "Tegmark, M. Life 3.0. Knopf, 2017.",
+      "Dunbar, R. Friends: Understanding the Power of Our Most Important Relationships. Little, Brown, 2021.",
+      "Metzinger, T. Being No One. MIT Press, 2003.",
+      "Dillenberg, H.G.O. & MARTIN. Notes from the Edge: Living with AI at 3am. Bridging IT AI & Humanity e.V. Working Paper, 2026.",
+      "Dillenberg, H.G.O. Gedicht Nr. 1: Der Wind. Unpublished manuscript, 2025."
+    ];
+    document.getElementById('references-list').innerHTML = refs.map((r,i) => 
+      `<div class="ref-item"><span class="ref-num">[${i+1}]</span><span>${r}</span></div>`
+    ).join('');
+  }
+}
+
+buildTOC();
+buildChapters();
+loadAbstract();
+loadAcknowledgements();
+loadReferences();
+</script>
+<style>
+  .back-btn {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    background: #000;
+    color: #00ffff;
+    border: 2px solid #00ffff;
+    padding: 8px 16px;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    box-shadow: 0 0 10px #00ffff;
+    z-index: 999;
+  }
+  .back-btn:hover { background: #00ffff; color: #000; }
+</style>
+<a href="/" class="back-btn">&#8592; BACK TO BASE</a>
+</body>
+</html>
